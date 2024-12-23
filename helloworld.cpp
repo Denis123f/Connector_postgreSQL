@@ -3,22 +3,23 @@
 #include <pqxx/pqxx>
 
 int main() {
-    /*g++ -o gnida helloworld.cpp -I/usr/include -I/usr/include/libpqxx-7.9.2 -L/usr/lib/x86_64-linux-gnu -lpqxx -lpq*/
-    // Задайте параметры подключения
     constexpr const char* db_host = "localhost"; // Локальный хост используется, если на Вашем пк запущена бд
     constexpr const char* db_user = "..."; // Пользователь, что заходит в базу данных
     constexpr const char* db_pass = "..."; // Пароль для входа
     constexpr const char* db_name = "..."; // база данных к которой присоединяемся
     std::string registers, name, password;
     try {
+        //Создание коннектора 
         pqxx::connection conn("dbname=" + std::string(db_name) +
                               " user=" + std::string(db_user) +
                               " password=" + std::string(db_pass) +
                               " host=" + std::string(db_host));
+        // Проверка подключения
         if(conn.is_open()){
             pqxx::work work(conn);
             std::cout << "Если вы зарегистрированы, то введите имя:\nИли введите register чтобы пройти регистрацию:";
             std::cin >> registers;
+            
             if(registers == "register" ) {
                 std::cout << "Укажите имя и пароль для регистрациия:";
                 std::cin >> name >> password; 
@@ -26,7 +27,9 @@ int main() {
                 work.exec0(zapros + '\'' + name + '\'' + ", " + password + ")"); 
                 work.commit();
                 std::cout << "Ваши данные добавлены и вы сможете авторизоваться."; 
-            }else{
+                
+            }else
+            {
                 pqxx::result res = work.exec("select name, login from admins");
                 std::cout << "Введите пароль: ";
                 std::cin >> password;
